@@ -219,14 +219,14 @@ def main():
     report = validator.generate_report()
 
     # Write report
-    with open('validation_report.md', 'w') as f:
+    with open('validation_report.md', 'w', encoding='utf-8') as f:
         f.write(report)
 
     print(report)
 
     # Write failure marker if there are errors
     if validator.errors:
-        with open('validation_failed.txt', 'w') as f:
+        with open('validation_failed.txt', 'w', encoding='utf-8') as f:
             f.write('\n'.join(validator.errors))
         sys.exit(1)
 

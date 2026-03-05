@@ -28,26 +28,16 @@ Examples:
 
 ### 2) Placeholders
 
-Allowed placeholder format:
-```
-[PLACEHOLDER IMAGE|TABLE|CONTENT NAME_OF_ITEM]
-```
+Any placeholder marker is blocked by CI and must be removed before merge.
 
-Examples:
-- ✅ `[PLACEHOLDER IMAGE DASHBOARD_SCREENSHOT]`
-- ✅ `[PLACEHOLDER TABLE USER_ROLES]`
-- ✅ `[PLACEHOLDER CONTENT INTEGRATION_GUIDE]`
-- ❌ `{{ placeholder }}`
-- ❌ `[[PLACEHOLDER]]`
+Examples of blocked content:
+- `PLACEHOLDER IMAGE ...`
+- `PLACEHOLDER TABLE ...`
+- `PLACEHOLDER CONTENT ...`
 
 ### 3) Draft Markers
 
-Reserved marker:
-```
-[DRAFT/TO-DO, CHANGE]
-```
-
-If present in PR content, the check fails until removed.
+Any draft marker text is blocked by CI and must be removed before merge.
 
 ### 4) Asset References
 
@@ -77,6 +67,6 @@ python scripts/validate_assets.py
 ## Common Failures
 
 - Invalid image filename → rename to `AMNIC_...` format
-- Invalid placeholder syntax → use `[PLACEHOLDER TYPE NAME]`
-- `[DRAFT/TO-DO, CHANGE]` left in content → remove before merge
+- Placeholder marker text left in content → remove before merge
+- Draft marker text left in content → remove before merge
 - Missing referenced file → add file or fix the reference path
