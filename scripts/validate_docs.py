@@ -119,10 +119,7 @@ class DocValidator:
         """Check for referenced images that don't exist"""
         is_valid = True
         cwd = os.getcwd()
-<<<<<<< Updated upstream
-=======
         base_dir = os.path.dirname(file_path)
->>>>>>> Stashed changes
 
         # Find image references in markdown
         # Patterns: ![alt](path/image.png) or [link](path/image.png)
@@ -139,10 +136,6 @@ class DocValidator:
                 full_path = os.path.join(cwd, img_ref.lstrip('/'))
             else:
                 # Relative path from the document location
-<<<<<<< Updated upstream
-                base_dir = os.path.dirname(file_path)
-=======
->>>>>>> Stashed changes
                 full_path = os.path.join(base_dir, img_ref)
 
             if not os.path.exists(full_path):
