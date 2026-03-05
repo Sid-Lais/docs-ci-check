@@ -49,8 +49,6 @@ If you haven't configured a **Cost and Usage Report (CUR)** yet, you can create 
 
 In Amnic:
 
-![Connect You AWS Account 2](/images/AMNIC_INTEGRATIONS_CONNECT_AWS-2.png)
-
 ![Connect You AWS Account 2](/images/AMNIC_INTEGRATIONS_CONNECT_AWS_2.png)
 
 * Go to **Settings → Integrations**
