@@ -115,7 +115,7 @@ jobs:
         run: python scripts/validate_images.py
 
   placeholder-check:
-    name: Check for Unresolved Placeholders
+    name: Block Placeholders and Forbidden Words
     runs-on: ubuntu-latest
 
     steps:
@@ -127,7 +127,7 @@ jobs:
         with:
           python-version: '3.10'
 
-      - name: Run placeholder validation
+      - name: Run placeholder and forbidden-word validation
         run: python scripts/check_placeholders.py
 
   asset-validation:

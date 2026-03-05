@@ -51,18 +51,20 @@ class DocValidator:
         lines = content.split('\n')
 
         for line_num, line in enumerate(lines, 1):
-            # Check for malformed placeholders
-            if '[PLACEHOLDER' in line.upper():
-                if not self.PLACEHOLDER_PATTERN.search(line):
+            # Check for any bracketed placeholder patterns
+            # Matches: [PLACEHOLDER ...], [IMAGE_PLACEHOLDER], [TABLE_PLACEHOLDER], etc.
+            placeholder_patterns = re.findall(r'\[[^\]]*PLACEHOLDER[^\]]*\]', line, re.IGNORECASE)
+            for placeholder in placeholder_patterns:
+                if not self.PLACEHOLDER_PATTERN.search(placeholder):
                     self.errors.append(
                         f"❌ Malformed placeholder in {file_path}:{line_num}\n"
-                        f"   Found: {line.strip()}\n"
+                        f"   Found: {placeholder}\n"
                         f"   Expected format: [PLACEHOLDER IMAGE/TABLE/CONTENT NAME_OF_CONTENT]"
                     )
                     is_valid = False
 
-            # Check for placeholder leftovers
-            if '{{' in line or '}}' in line or '###' in line.upper():
+            # Check for placeholder leftovers (mustache syntax)
+            if '{{' in line or '}}' in line:
                 if 'PLACEHOLDER' not in line and 'TODO' not in line:
                     self.warnings.append(
                         f"⚠️ Possible unresolved placeholder in {file_path}:{line_num}\n"
@@ -116,11 +118,15 @@ class DocValidator:
     def check_missing_assets(self, file_path: str, content: str) -> bool:
         """Check for referenced images that don't exist"""
         is_valid = True
+        cwd = os.getcwd()
+<<<<<<< Updated upstream
+=======
         base_dir = os.path.dirname(file_path)
+>>>>>>> Stashed changes
 
         # Find image references in markdown
         # Patterns: ![alt](path/image.png) or [link](path/image.png)
-        image_refs = re.findall(r'\!\?\[.*?\]\((.*?)\)', content)
+        image_refs = re.findall(r'\!\[.*?\]\((.*?)\)', content)
         image_refs.extend(re.findall(r'\[.*?\]\((.*?\.(?:png|jpg|jpeg|gif))\)', content))
 
         for img_ref in image_refs:
@@ -128,8 +134,17 @@ class DocValidator:
             if img_ref.startswith(('http://', 'https://', 'www.')):
                 continue
 
-            # Check if file exists
-            full_path = os.path.join(base_dir, img_ref)
+            # Handle absolute paths (starting with /) as relative to project root
+            if img_ref.startswith('/'):
+                full_path = os.path.join(cwd, img_ref.lstrip('/'))
+            else:
+                # Relative path from the document location
+<<<<<<< Updated upstream
+                base_dir = os.path.dirname(file_path)
+=======
+>>>>>>> Stashed changes
+                full_path = os.path.join(base_dir, img_ref)
+
             if not os.path.exists(full_path):
                 self.errors.append(
                     f"❌ Referenced asset not found in {file_path}\n"
@@ -219,14 +234,14 @@ def main():
     report = validator.generate_report()
 
     # Write report
-    with open('validation_report.md', 'w') as f:
+    with open('validation_report.md', 'w', encoding='utf-8') as f:
         f.write(report)
 
     print(report)
 
     # Write failure marker if there are errors
     if validator.errors:
-        with open('validation_failed.txt', 'w') as f:
+        with open('validation_failed.txt', 'w', encoding='utf-8') as f:
             f.write('\n'.join(validator.errors))
         sys.exit(1)
 

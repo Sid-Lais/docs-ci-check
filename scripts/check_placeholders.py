@@ -1,11 +1,11 @@
 #!/usr/bin/env python3
 """
-Check for unresolved placeholders in documentation.
-Valid formats:
-  - [PLACEHOLDER IMAGE NAME_OF_CONTENT]
-  - [PLACEHOLDER TABLE NAME_OF_CONTENT]
-  - [PLACEHOLDER CONTENT NAME_OF_CONTENT]
-  - [DRAFT/TO-DO, CHANGE]
+Strict content gate for documentation.
+
+Blocks merge when any of the following are present:
+1) Any placeholder marker (e.g. [PLACEHOLDER ...])
+2) Any draft marker (e.g. [DRAFT/TO-DO, CHANGE])
+3) Forbidden words (case-insensitive): Vantage, Cloudzero, finout
 """
 
 import os
@@ -15,11 +15,9 @@ from pathlib import Path
 
 
 class PlaceholderChecker:
-    # Valid placeholder format: [PLACEHOLDER TYPE NAME]
-    VALID_PLACEHOLDER = re.compile(r'^\[PLACEHOLDER\s+(IMAGE|TABLE|CONTENT)\s+[A-Z0-9_]+\]$')
-
-    # Valid draft format: [DRAFT/TO-DO, CHANGE]
-    VALID_DRAFT = re.compile(r'^\[DRAFT/TO-DO,?\s*CHANGE\]$')
+    ANY_PLACEHOLDER = re.compile(r'\[PLACEHOLDER[^\]]*\]', re.IGNORECASE)
+    ANY_DRAFT = re.compile(r'\[(?:DRAFT|TO-DO)[^\]]*\]', re.IGNORECASE)
+    FORBIDDEN_WORDS = ('vantage', 'cloudzero', 'finout')
 
     # Common invalid patterns
     INVALID_PATTERNS = [
@@ -37,14 +35,25 @@ class PlaceholderChecker:
         self.warnings = []
 
     def check_placeholders_in_file(self, file_path: str, content: str) -> bool:
-        """Check for unresolved placeholders in file"""
+        """Check for blocked content in file"""
         is_valid = True
         lines = content.split('\n')
 
         for line_num, line in enumerate(lines, 1):
-            # Check for PLACEHOLDER patterns
-            placeholders = re.findall(r'\[PLACEHOLDER[^\]]*\]', line, re.IGNORECASE)
+<<<<<<< Updated upstream
+            placeholders = self.ANY_PLACEHOLDER.findall(line)
             for placeholder in placeholders:
+                self.errors.append(
+                    f"❌ Unresolved placeholder in {file_path}:{line_num}\n"
+                    f"   Found: {placeholder}\n"
+                    f"   Any placeholder blocks merge. Replace with final content."
+                )
+                is_valid = False
+=======
+            # Check for any bracketed placeholder patterns (must be in brackets to avoid false positives)
+            # Matches: [PLACEHOLDER ...], [IMAGE_PLACEHOLDER], [TABLE_PLACEHOLDER], etc.
+            placeholder_patterns = re.findall(r'\[[^\]]*PLACEHOLDER[^\]]*\]', line, re.IGNORECASE)
+            for placeholder in placeholder_patterns:
                 if not self.VALID_PLACEHOLDER.search(placeholder):
                     self.errors.append(
                         f"❌ Invalid placeholder format in {file_path}:{line_num}\n"
@@ -53,23 +62,23 @@ class PlaceholderChecker:
                         f"   Example: [PLACEHOLDER IMAGE DASHBOARD_SCREENSHOT]"
                     )
                     is_valid = False
+>>>>>>> Stashed changes
 
-            # Check for DRAFT patterns
-            if re.search(r'\[DRAFT|\[TO-DO|CHANGE\]', line, re.IGNORECASE):
-                if not self.VALID_DRAFT.search(line.strip()):
+            drafts = self.ANY_DRAFT.findall(line)
+            for draft_marker in drafts:
+                self.errors.append(
+                    f"❌ Unresolved draft marker in {file_path}:{line_num}\n"
+                    f"   Found: {draft_marker}\n"
+                    f"   Draft markers block merge until removed."
+                )
+                is_valid = False
+
+            for forbidden in self.FORBIDDEN_WORDS:
+                for _ in re.finditer(rf'\b{re.escape(forbidden)}\b', line, flags=re.IGNORECASE):
                     self.errors.append(
-                        f"❌ Invalid draft marker in {file_path}:{line_num}\n"
-                        f"   Found: {line.strip()}\n"
-                        f"   Expected: [DRAFT/TO-DO, CHANGE]\n"
-                        f"   (This indicates incomplete work that shouldn't be merged)"
-                    )
-                    is_valid = False
-                else:
-                    # Valid draft marker found - should not be in production
-                    self.errors.append(
-                        f"❌ Unresolved DRAFT marker in {file_path}:{line_num}\n"
-                        f"   {line.strip()}\n"
-                        f"   Please resolve or remove before merging."
+                        f"❌ Forbidden word in {file_path}:{line_num}\n"
+                        f"   Found: {forbidden}\n"
+                        f"   Remove or replace forbidden terms before merging."
                     )
                     is_valid = False
 
@@ -109,11 +118,11 @@ class PlaceholderChecker:
         return is_valid
 
     def generate_report(self) -> str:
-        """Generate placeholder check report"""
+        """Generate policy check report"""
         if not self.errors and not self.warnings:
-            return "✅ No unresolved placeholders found!\n"
+            return "✅ No blocked placeholders, draft markers, or forbidden words found!\n"
 
-        report = "# 📌 Placeholder Check Report\n\n"
+        report = "# 📌 Placeholder and Forbidden Word Check Report\n\n"
 
         if self.errors:
             report += "## ❌ Critical Issues\n\n"
@@ -131,9 +140,8 @@ def main():
     checker = PlaceholderChecker()
     cwd = os.getcwd()
 
-    # Check docs directory
-    docs_dir = os.path.join(cwd, 'docs')
-    checker.check_directory(docs_dir)
+    # Check entire repository markdown content
+    checker.check_directory(cwd)
 
     report = checker.generate_report()
     print(report)
