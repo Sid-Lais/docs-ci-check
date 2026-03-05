@@ -51,12 +51,14 @@ class DocValidator:
         lines = content.split('\n')
 
         for line_num, line in enumerate(lines, 1):
-            # Check for malformed placeholders
-            if '[PLACEHOLDER' in line.upper():
-                if not self.PLACEHOLDER_PATTERN.search(line):
+            # Check for any bracketed placeholder patterns
+            # Matches: [PLACEHOLDER ...], [IMAGE_PLACEHOLDER], [TABLE_PLACEHOLDER], etc.
+            placeholder_patterns = re.findall(r'\[[^\]]*PLACEHOLDER[^\]]*\]', line, re.IGNORECASE)
+            for placeholder in placeholder_patterns:
+                if not self.PLACEHOLDER_PATTERN.search(placeholder):
                     self.errors.append(
                         f"❌ Malformed placeholder in {file_path}:{line_num}\n"
-                        f"   Found: {line.strip()}\n"
+                        f"   Found: {placeholder}\n"
                         f"   Expected format: [PLACEHOLDER IMAGE/TABLE/CONTENT NAME_OF_CONTENT]"
                     )
                     is_valid = False
@@ -117,6 +119,10 @@ class DocValidator:
         """Check for referenced images that don't exist"""
         is_valid = True
         cwd = os.getcwd()
+<<<<<<< Updated upstream
+=======
+        base_dir = os.path.dirname(file_path)
+>>>>>>> Stashed changes
 
         # Find image references in markdown
         # Patterns: ![alt](path/image.png) or [link](path/image.png)
@@ -133,7 +139,10 @@ class DocValidator:
                 full_path = os.path.join(cwd, img_ref.lstrip('/'))
             else:
                 # Relative path from the document location
+<<<<<<< Updated upstream
                 base_dir = os.path.dirname(file_path)
+=======
+>>>>>>> Stashed changes
                 full_path = os.path.join(base_dir, img_ref)
 
             if not os.path.exists(full_path):
