@@ -40,6 +40,7 @@ class PlaceholderChecker:
         lines = content.split('\n')
 
         for line_num, line in enumerate(lines, 1):
+<<<<<<< Updated upstream
             placeholders = self.ANY_PLACEHOLDER.findall(line)
             for placeholder in placeholders:
                 self.errors.append(
@@ -48,6 +49,20 @@ class PlaceholderChecker:
                     f"   Any placeholder blocks merge. Replace with final content."
                 )
                 is_valid = False
+=======
+            # Check for any bracketed placeholder patterns (must be in brackets to avoid false positives)
+            # Matches: [PLACEHOLDER ...], [IMAGE_PLACEHOLDER], [TABLE_PLACEHOLDER], etc.
+            placeholder_patterns = re.findall(r'\[[^\]]*PLACEHOLDER[^\]]*\]', line, re.IGNORECASE)
+            for placeholder in placeholder_patterns:
+                if not self.VALID_PLACEHOLDER.search(placeholder):
+                    self.errors.append(
+                        f"❌ Invalid placeholder format in {file_path}:{line_num}\n"
+                        f"   Found: {placeholder}\n"
+                        f"   Expected: [PLACEHOLDER IMAGE/TABLE/CONTENT NAME_OF_ITEM]\n"
+                        f"   Example: [PLACEHOLDER IMAGE DASHBOARD_SCREENSHOT]"
+                    )
+                    is_valid = False
+>>>>>>> Stashed changes
 
             drafts = self.ANY_DRAFT.findall(line)
             for draft_marker in drafts:

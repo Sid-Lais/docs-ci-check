@@ -58,8 +58,8 @@ class AssetValidator:
             else:
                 path = ref
 
-            # Skip external URLs
-            if path.startswith(('http://', 'https://', 'www.', 'mailto:', '#')):
+            # Skip external URLs and query parameters
+            if path.startswith(('http://', 'https://', 'www.', 'mailto:', '#', '?')):
                 continue
 
             all_refs.append((file_path, path))
@@ -135,7 +135,9 @@ class AssetValidator:
                                 content = f.read()
                             refs = self.extract_asset_references(file_path, content)
                             for _, asset in refs:
-                                used_assets.add(asset)
+                                # Normalize asset path (strip leading /) to match existing_assets format
+                                normalized_asset = asset.lstrip('/').replace('\\\\', '/')
+                                used_assets.add(normalized_asset)
                         except:
                             pass
 
@@ -145,7 +147,7 @@ class AssetValidator:
                 # Only warn about images, not all assets
                 if asset.endswith(('.png', '.jpg', '.jpeg', '.gif', '.svg')):
                     self.warnings.append(
-                        f"⚠️ Unused asset: {asset}\n"
+                        f"⚠️ Unused asset: {asset}\\n"
                         f"   This file is in the assets/images directory but not referenced in any documentation."
                     )
 

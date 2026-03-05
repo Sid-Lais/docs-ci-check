@@ -61,8 +61,8 @@ class DocValidator:
                     )
                     is_valid = False
 
-            # Check for placeholder leftovers
-            if '{{' in line or '}}' in line or '###' in line.upper():
+            # Check for placeholder leftovers (mustache syntax)
+            if '{{' in line or '}}' in line:
                 if 'PLACEHOLDER' not in line and 'TODO' not in line:
                     self.warnings.append(
                         f"⚠️ Possible unresolved placeholder in {file_path}:{line_num}\n"
@@ -116,11 +116,11 @@ class DocValidator:
     def check_missing_assets(self, file_path: str, content: str) -> bool:
         """Check for referenced images that don't exist"""
         is_valid = True
-        base_dir = os.path.dirname(file_path)
+        cwd = os.getcwd()
 
         # Find image references in markdown
         # Patterns: ![alt](path/image.png) or [link](path/image.png)
-        image_refs = re.findall(r'\!\?\[.*?\]\((.*?)\)', content)
+        image_refs = re.findall(r'\!\[.*?\]\((.*?)\)', content)
         image_refs.extend(re.findall(r'\[.*?\]\((.*?\.(?:png|jpg|jpeg|gif))\)', content))
 
         for img_ref in image_refs:
@@ -128,8 +128,14 @@ class DocValidator:
             if img_ref.startswith(('http://', 'https://', 'www.')):
                 continue
 
-            # Check if file exists
-            full_path = os.path.join(base_dir, img_ref)
+            # Handle absolute paths (starting with /) as relative to project root
+            if img_ref.startswith('/'):
+                full_path = os.path.join(cwd, img_ref.lstrip('/'))
+            else:
+                # Relative path from the document location
+                base_dir = os.path.dirname(file_path)
+                full_path = os.path.join(base_dir, img_ref)
+
             if not os.path.exists(full_path):
                 self.errors.append(
                     f"❌ Referenced asset not found in {file_path}\n"
