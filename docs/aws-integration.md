@@ -44,9 +44,15 @@ If you haven't configured a **Cost and Usage Report (CUR)** yet, you can create 
 
 ### **1\. Open the AWS Integration Wizard**
 
+<<<<<<< Updated upstream
 In Amnic:
 
 ![Connect You AWS Account 2](/images/AMNIC_INTEGRATIONS_CONNECT_AWS-2.png)
+=======
+![Connect You AWS Account 2](/images/AMNIC_INTEGRATIONS_CONNECT_AWS_2.png)
+
+In Amnic:
+>>>>>>> Stashed changes
 
 * Go to **Settings → Integrations**
 * Click **AWS** to open the connection wizard
