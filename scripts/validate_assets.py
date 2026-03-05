@@ -7,8 +7,6 @@ Ensures all referenced assets exist and are accessible.
 import os
 import re
 import sys
-from pathlib import Path
-from urllib.parse import urlparse
 
 
 class AssetValidator:
@@ -17,6 +15,17 @@ class AssetValidator:
         self.warnings = []
         self.referenced_assets = {}
         self.existing_assets = set()
+
+    def normalize_reference(self, root_dir: str, doc_path: str, asset_ref: str) -> str:
+        """Normalize an asset reference into a repo-relative path."""
+        if asset_ref.startswith('/'):
+            normalized = asset_ref.lstrip('/')
+        else:
+            doc_dir = os.path.dirname(doc_path)
+            full_path = os.path.normpath(os.path.join(doc_dir, asset_ref))
+            normalized = os.path.relpath(full_path, root_dir)
+
+        return normalized.replace('\\', '/')
 
     def find_existing_assets(self, root_dir: str):
         """Build a set of all existing assets"""
@@ -86,19 +95,7 @@ class AssetValidator:
                         refs = self.extract_asset_references(file_path, content)
 
                         for doc_path, asset_ref in refs:
-                            # Resolve relative path
-                            if asset_ref.startswith('/'):
-                                # Absolute from root
-                                normalized = asset_ref.lstrip('/')
-                            else:
-                                # Relative to document
-                                doc_dir = os.path.dirname(doc_path)
-                                full_path = os.path.normpath(
-                                    os.path.join(doc_dir, asset_ref)
-                                )
-                                normalized = os.path.relpath(full_path, root_dir)
-
-                            normalized = normalized.replace('\\', '/')
+                            normalized = self.normalize_reference(root_dir, doc_path, asset_ref)
 
                             # Check if asset exists
                             if normalized not in self.existing_assets:
@@ -117,7 +114,7 @@ class AssetValidator:
                         self.errors.append(f"❌ Error reading {file_path}: {str(e)}")
 
     def check_asset_usage(self, root_dir: str):
-        """Check for unused assets (optional warning)"""
+        """Check for unused assets and fail on unused images."""
         used_assets = set()
 
         for directory in ['docs']:
@@ -134,21 +131,19 @@ class AssetValidator:
                             with open(file_path, 'r', encoding='utf-8', errors='ignore') as f:
                                 content = f.read()
                             refs = self.extract_asset_references(file_path, content)
-                            for _, asset in refs:
-                                # Normalize asset path (strip leading /) to match existing_assets format
-                                normalized_asset = asset.lstrip('/').replace('\\\\', '/')
+                            for doc_path, asset in refs:
+                                normalized_asset = self.normalize_reference(root_dir, doc_path, asset)
                                 used_assets.add(normalized_asset)
                         except:
                             pass
 
-        # Find unused assets (optional)
+        # Fail CI if any image in repo is not referenced by docs.
         for asset in self.existing_assets:
             if asset not in used_assets:
-                # Only warn about images, not all assets
                 if asset.endswith(('.png', '.jpg', '.jpeg', '.gif', '.svg')):
-                    self.warnings.append(
-                        f"⚠️ Unused asset: {asset}\\n"
-                        f"   This file is in the assets/images directory but not referenced in any documentation."
+                    self.errors.append(
+                        f"❌ Unused image: {asset}\n"
+                        f"   This file exists in images/assets but is not referenced by any doc in docs/."
                     )
 
     def generate_report(self) -> str:
