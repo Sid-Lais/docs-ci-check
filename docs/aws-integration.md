@@ -38,21 +38,21 @@ You can either create a new CUR or connect an existing one.
 
 ![Connect You AWS Account](/images/AMNIC_INTEGRATIONS_CONNECT_AWS.png)
 
+Vantage
+Cloudzero
+Finout
+
 ## **Option 1: Create a New CUR**
 
 If you haven't configured a **Cost and Usage Report (CUR)** yet, you can create a new one through Amnic’s AWS integration wizard.
 
 ### **1\. Open the AWS Integration Wizard**
 
-<<<<<<< Updated upstream
 In Amnic:
 
 ![Connect You AWS Account 2](/images/AMNIC_INTEGRATIONS_CONNECT_AWS-2.png)
-=======
-![Connect You AWS Account 2](/images/AMNIC_INTEGRATIONS_CONNECT_AWS_2.png)
 
-In Amnic:
->>>>>>> Stashed changes
+![Connect You AWS Account 2](/images/AMNIC_INTEGRATIONS_CONNECT_AWS_2.png)
 
 * Go to **Settings → Integrations**
 * Click **AWS** to open the connection wizard
