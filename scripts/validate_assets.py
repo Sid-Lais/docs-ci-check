@@ -179,9 +179,16 @@ def main():
     validator.check_asset_usage(cwd)
 
     report = validator.generate_report()
+
+    # Write asset report for CI comment publishing.
+    with open('asset_validation_report.md', 'w', encoding='utf-8') as f:
+        f.write(report)
+
     print(report)
 
     if validator.errors:
+        with open('asset_validation_failed.txt', 'w', encoding='utf-8') as f:
+            f.write('\n'.join(validator.errors))
         sys.exit(1)
 
     return 0
