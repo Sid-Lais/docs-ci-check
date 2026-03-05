@@ -1,0 +1,39 @@
+# GitHub CODEOWNERS Configuration
+
+This file automatically requires relevant code owners to review pull requests.
+
+## Setup
+
+Place this file at: `.github/CODEOWNERS`
+
+---
+
+```
+# Documentation Team - All docs/assets require Aniket's review
+docs/ @aniket
+assets/ @aniket
+images/ @aniket
+
+# GitHub Actions workflows require admin review (optional)
+.github/workflows/ @aniket
+
+# Default owner for anything not specified above
+* @aniket
+```
+
+---
+
+## How It Works
+
+- When someone creates a PR that modifies files in `docs/`, `assets/`, or `images/`
+- GitHub automatically adds Aniket as a required reviewer
+- The PR cannot be merged without Aniket's approval
+- Aniket can be a regular contributor (not necessarily admin)
+
+---
+
+## To Use
+
+1. Replace `@aniket` with actual GitHub username
+2. Save to repository at `.github/CODEOWNERS`
+3. Reference it in branch protection rules (Settings → Branches → Protection Rules)
