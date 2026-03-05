@@ -40,7 +40,6 @@ You can either create a new CUR or connect an existing one.
 
 Vantage
 Cloudzero
-Finout
 
 ## **Option 1: Create a New CUR**
 
